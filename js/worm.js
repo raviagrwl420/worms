@@ -28,8 +28,8 @@ class Worm {
             strokeCap: STROKE_CAP
         });
 
-        for (var i = 0; i < this.numPoints; i++) {
-            var newPoint = this.start.add(new paper.Point(i * SEGMENT_LENGTH, 0));
+        for (let i = 0; i < this.numPoints; i++) {
+            let newPoint = this.start.add(new paper.Point(i * SEGMENT_LENGTH, 0));
             this.path.add(newPoint.rotate(this.orientation, this.start));
         }
 
@@ -40,7 +40,7 @@ class Worm {
     }
 
     move(delta) {
-        var next = this.path.firstSegment.point.subtract(
+        let next = this.path.firstSegment.point.subtract(
             this.path.firstSegment.next.point)
             .normalize()
             .multiply(delta * this.speed)
@@ -48,10 +48,10 @@ class Worm {
 
         this.path.firstSegment.point = this.path.firstSegment.point.add(next);
         this.head.position = this.path.firstSegment.point;
-        for (var i = 0; i < this.numPoints - 1; i++) {
-            var segment = this.path.segments[i];
-            var nextSegment = segment.next;
-            var vector = segment.point.subtract(nextSegment.point);
+        for (let i = 0; i < this.numPoints - 1; i++) {
+            let segment = this.path.segments[i];
+            let nextSegment = segment.next;
+            let vector = segment.point.subtract(nextSegment.point);
             vector.length = SEGMENT_LENGTH;
             nextSegment.point = segment.point.subtract(vector);
         }
@@ -60,15 +60,15 @@ class Worm {
     }
 
     collides() {
-        var edgeCollision = !paper.view.bounds.contains(this.path.firstSegment.point);
+        let edgeCollision = !paper.view.bounds.contains(this.path.firstSegment.point);
 
-        var head = this.head;
-        var selfCollisions = this.path.segments.map(function (segment, index) {
-            if (index == 0) {
+        let head = this.head;
+        let selfCollisions = this.path.segments.map(function (segment, index) {
+            if (index === 0) {
                 return false;
             } else {
-                var lengthOfSegments = index * SEGMENT_LENGTH;
-                var areClose = head.position.getDistance(segment.point, true) <= (Math.pow(STROKE_WIDTH, 2));
+                let lengthOfSegments = index * SEGMENT_LENGTH;
+                let areClose = head.position.getDistance(segment.point, true) <= (Math.pow(STROKE_WIDTH, 2));
                 return lengthOfSegments > STROKE_WIDTH && areClose;
             }
         });
@@ -94,19 +94,19 @@ class Worm {
     handleEvent(key, event) {
         switch (key) {
             case KEY.UP_KEY:
-                if (event == EVENT.DOWN)
+                if (event === EVENT.DOWN)
                     this.speed = MAX_SPEED;
                 // else
                     // this.speed = 0;
                 break;
             case KEY.LEFT_KEY:
-                if (event == EVENT.DOWN)
+                if (event === EVENT.DOWN)
                     this.turnSpeed = -TURN_SPEED;
                 else
                     this.turnSpeed = 0;
                 break;
             case KEY.RIGHT_KEY:
-                if (event == EVENT.DOWN)
+                if (event === EVENT.DOWN)
                     this.turnSpeed = TURN_SPEED;
                 else
                     this.turnSpeed = 0
@@ -115,7 +115,7 @@ class Worm {
 
     hitTest(food) {
         if (this.head.position.getDistance(food.center, true) <= (Math.pow(STROKE_WIDTH,2))) {
-            var vector = this.path.lastSegment.previous.point.subtract(this.path.lastSegment.point);
+            let vector = this.path.lastSegment.previous.point.subtract(this.path.lastSegment.point);
             vector.length = SEGMENT_LENGTH;
             this.path.insert(this.numPoints, this.path.lastSegment.point.subtract(vector));
             this.numPoints += 1;

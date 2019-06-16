@@ -3,8 +3,8 @@ COLOR = '#E4141B';
 
 class Food {
     constructor() {
-        var x = paper.view.bounds.right * Math.random();
-        var y = paper.view.bounds.bottom * Math.random();
+        let x = paper.view.bounds.right * Math.random();
+        let y = paper.view.bounds.bottom * Math.random();
         this.center = new paper.Point(x, y);
 
         this.setup();

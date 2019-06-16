@@ -1,8 +1,9 @@
-// Setup paper once the DOM is ready.
 window.onload = function () {
-    var canvas = document.getElementById('gameCanvas')
+    // Setup paper once the DOM is ready
+    let canvas = document.getElementById('gameCanvas');
     paper.setup(canvas);
 
-    game = new Game();
+    // Create game and start game loop
+    let game = new Game();
     game.startLoop();
 };
