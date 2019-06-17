@@ -2,9 +2,9 @@ RADIUS = 10;
 COLOR = '#E4141B';
 
 class Food {
-    constructor() {
-        let x = paper.view.bounds.right * Math.random();
-        let y = paper.view.bounds.bottom * Math.random();
+    constructor(bounds) {
+        let x = bounds.right * Math.random();
+        let y = bounds.bottom * Math.random();
         this.center = new paper.Point(x, y);
 
         this.setup();
@@ -14,7 +14,7 @@ class Food {
         this.circle = new paper.Shape.Circle({
             center: this.center,
             radius: RADIUS,
-            strokeColor: COLOR,
+            strokeWidth: 0,
             fillColor: COLOR
         });
     }

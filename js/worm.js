@@ -1,53 +1,61 @@
-START_POINTS = 3;
-SEGMENT_LENGTH = 10;
-STROKE_COLOR = '#E4141B';
 STROKE_WIDTH = 20;
 STROKE_CAP = 'round';
-MAX_SPEED = 200;
-TURN_SPEED = 1000;
-DEAD_COLOR = '#222222';
+NUM_POINTS = 3;
+SEGMENT_LENGTH = 10;
 
 class Worm {
-    constructor(start, orientation) {
-        this.start = start;
-        this.orientation = orientation;
-
-        this.numPoints = START_POINTS;
-        this.speed = 0;
-        this.turnSpeed = 0;
-        this.color = STROKE_COLOR;
-        this.dead = false;
-
-        this.setup();
-    }
-
-    setup() {
+    constructor(color, position, orientation) {
         this.path = new paper.Path({
-            strokeColor: STROKE_COLOR,
+            strokeColor: color,
             strokeWidth: STROKE_WIDTH,
             strokeCap: STROKE_CAP
         });
 
+        this.numPoints = NUM_POINTS;
         for (let i = 0; i < this.numPoints; i++) {
-            let newPoint = this.start.add(new paper.Point(i * SEGMENT_LENGTH, 0));
-            this.path.add(newPoint.rotate(this.orientation, this.start));
+            let newPoint = position.add(new paper.Point(i * SEGMENT_LENGTH, 0));
+            this.path.add(newPoint.rotate(orientation, position));
         }
 
         this.head = new paper.Shape.Circle({
             center: this.path.firstSegment.point,
-            radius: STROKE_WIDTH
-        })
+            radius: STROKE_WIDTH / 2
+        });
     }
 
-    move(delta) {
-        let next = this.path.firstSegment.point.subtract(
-            this.path.firstSegment.next.point)
-            .normalize()
-            .multiply(delta * this.speed)
-            .rotate(delta * this.turnSpeed);
+    getHeadVector() {
+        return this.path.firstSegment.point.subtract(
+            this.path.firstSegment.next.point).normalize();
+    }
 
-        this.path.firstSegment.point = this.path.firstSegment.point.add(next);
+    edgeCollision() {
+        return !paper.view.bounds.contains(this.head.bounds);
+    }
+
+    selfCollision() {
+        let head = this.head;
+
+        let collisions = this.path.segments.map(function (segment, index) {
+            let lengthOfSegments = index * SEGMENT_LENGTH;
+            let collide = head.position.getDistance(segment.point, true) <= (Math.pow(STROKE_WIDTH, 2));
+            return lengthOfSegments > STROKE_WIDTH && collide;
+        });
+
+        return collisions.includes(true);
+    }
+
+    foodCollision(food) {
+        return this.head.position.getDistance(food.center, true) <= (Math.pow(STROKE_WIDTH,2));
+    }
+
+    update(delta) {
+
+    }
+
+    updatePosition(position) {
+        this.path.firstSegment.point = position;
         this.head.position = this.path.firstSegment.point;
+
         for (let i = 0; i < this.numPoints - 1; i++) {
             let segment = this.path.segments[i];
             let nextSegment = segment.next;
@@ -59,70 +67,18 @@ class Worm {
         this.path.smooth({type: 'continuous'});
     }
 
-    collides() {
-        let edgeCollision = !paper.view.bounds.contains(this.path.firstSegment.point);
-
-        let head = this.head;
-        let selfCollisions = this.path.segments.map(function (segment, index) {
-            if (index === 0) {
-                return false;
-            } else {
-                let lengthOfSegments = index * SEGMENT_LENGTH;
-                let areClose = head.position.getDistance(segment.point, true) <= (Math.pow(STROKE_WIDTH, 2));
-                return lengthOfSegments > STROKE_WIDTH && areClose;
-            }
-        });
-
-        return edgeCollision || selfCollisions.includes(true);
+    updateColor(color) {
+        this.path.strokeColor = color;
     }
 
-    update(delta) {
-        if (!this.dead) {
-            this.move(delta);
-
-            if (this.collides()) {
-                this.dead = true;
-                this.path.strokeColor = DEAD_COLOR;
-            }
-        }
+    updateLength() {
+        let vector = this.path.lastSegment.previous.point.subtract(this.path.lastSegment.point);
+        vector.length = SEGMENT_LENGTH;
+        this.path.insert(this.numPoints, this.path.lastSegment.point.subtract(vector));
+        this.numPoints++;
     }
 
     render(delta) {
 
-    }
-
-    handleEvent(key, event) {
-        switch (key) {
-            case KEY.UP_KEY:
-                if (event === EVENT.DOWN)
-                    this.speed = MAX_SPEED;
-                // else
-                    // this.speed = 0;
-                break;
-            case KEY.LEFT_KEY:
-                if (event === EVENT.DOWN)
-                    this.turnSpeed = -TURN_SPEED;
-                else
-                    this.turnSpeed = 0;
-                break;
-            case KEY.RIGHT_KEY:
-                if (event === EVENT.DOWN)
-                    this.turnSpeed = TURN_SPEED;
-                else
-                    this.turnSpeed = 0
-        }
-    }
-
-    hitTest(food) {
-        if (this.head.position.getDistance(food.center, true) <= (Math.pow(STROKE_WIDTH,2))) {
-            let vector = this.path.lastSegment.previous.point.subtract(this.path.lastSegment.point);
-            vector.length = SEGMENT_LENGTH;
-            this.path.insert(this.numPoints, this.path.lastSegment.point.subtract(vector));
-            this.numPoints += 1;
-
-            food.destroy();
-            food = new Food();
-        }
-        return food;
     }
 }
