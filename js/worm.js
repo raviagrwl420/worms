@@ -48,6 +48,28 @@ class Worm {
         return this.head.position.getDistance(food.center, true) <= (Math.pow(STROKE_WIDTH,2));
     }
 
+    playerCollision(other) {
+        let head = this.head;
+
+        let collisions = other.worm.path.segments.map(function (segment, index) {
+            return head.position.getDistance(segment.point, true) <= (Math.pow(STROKE_WIDTH, 2));
+        });
+
+        return collisions.includes(true);
+    }
+
+    ballCollision(ball) {
+        if (this.path.strokeBounds.contains(ball.circle.bounds)) {
+            let nearest = this.path.getNearestLocation(ball.circle.position);
+            if (nearest.point.getDistance(ball.circle.position, true) < Math.pow(STROKE_WIDTH, 2)) {
+                let normal = nearest.normal;
+                let ballVector = (new paper.Point(1, 0)).rotate(ball.orientation);
+                let newVector = ballVector.subtract(normal.multiply(2*ballVector.dot(normal)));
+                ball.orientation = newVector.angle;
+            }
+        }
+    }
+
     update(delta) {
 
     }

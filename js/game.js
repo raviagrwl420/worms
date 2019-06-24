@@ -22,11 +22,13 @@ const KEY_SETS = {
 const PLAYER_PROPS = {
     PLAYER_1: {
         COLOR: '#0C9CE8',
-        KEY_SET: KEY_SETS.PLAYER_1
+        KEY_SET: KEY_SETS.PLAYER_1,
+        SCORE_LOC: [50, 100]
     },
     PLAYER_2: {
         COLOR: '#0CE880',
-        KEY_SET: KEY_SETS.PLAYER_2
+        KEY_SET: KEY_SETS.PLAYER_2,
+        SCORE_LOC: [1800, 100]
     }
 };
 
@@ -37,6 +39,7 @@ const EVENT = {
 };
 
 const NUM_FOODS = 20;
+const OFFSET = 500;
 
 class Game {
     constructor() {
@@ -45,38 +48,56 @@ class Game {
         this.startTime = null;
         this.lastTime = null;
 
-        this.player1 = new Player(PLAYER_PROPS.PLAYER_1, paper.view.center, 180);
-        this.player2 = new Player(PLAYER_PROPS.PLAYER_2, paper.view.center, 180);
+        this.player1 = new Player(PLAYER_PROPS.PLAYER_1,
+            paper.view.center.add(new paper.Point(-OFFSET, 0)),
+            180);
+        this.player2 = new Player(PLAYER_PROPS.PLAYER_2,
+            paper.view.center.add(new paper.Point(OFFSET, 0)),
+            0);
 
         this.foods = [];
         for (let i = 0; i < NUM_FOODS; i++) {
             this.foods.push(new Food(paper.view.bounds));
         }
 
+        this.ball = new Ball(paper.view.center);
+
         this.addEventListeners();
     }
 
     update(delta) {
-        this.player1.update(delta);
-        this.player2.update(delta);
-        for (let i in this.foods) {
-            let food = this.foods[i];
-            if (this.player1.foodCollision(food)) {
-                this.player1.updateSize();
-                food.destroy();
-                this.foods[i] = new Food(paper.view.bounds);
+        if (this.gameState == GAME_STATE.GAME_IN_PLAY) {
+            this.player1.update(delta);
+            this.player2.update(delta);
+            for (let i in this.foods) {
+                let food = this.foods[i];
+                if (this.player1.foodCollision(food)) {
+                    this.player1.updateSize();
+                    food.destroy();
+                    this.foods[i] = new Food(paper.view.bounds);
+                }
+                if (this.player2.foodCollision(food)) {
+                    this.player2.updateSize();
+                    food.destroy();
+                    this.foods[i] = new Food(paper.view.bounds);
+                }
             }
-            if (this.player2.foodCollision(food)) {
-                this.player2.updateSize();
-                food.destroy();
-                this.foods[i] = new Food(paper.view.bounds);
+            if (this.player1.playerCollision(this.player2)) {
+                this.player1.die();
+            }
+            if (this.player2.playerCollision(this.player1)) {
+                this.player2.die();
             }
         }
+        this.player1.ballCollision(this.ball);
+        this.player2.ballCollision(this.ball);
+        this.ball.update(delta);
     }
 
     render(delta) {
         this.player1.render(delta);
         this.player2.render(delta);
+        this.ball.render();
     }
 
     loop(timestamp) {
@@ -97,6 +118,7 @@ class Game {
     }
 
     startLoop() {
+        this.gameState = GAME_STATE.GAME_IN_PLAY;
         window.requestAnimationFrame(this.loop.bind(this));
     }
 

@@ -1,4 +1,4 @@
-const MAX_SPEED = 200;
+const MAX_SPEED = 300;
 const TURN_SPEED = 1000;
 const DEAD_COLOR = '#333333';
 
@@ -15,6 +15,12 @@ class Player {
         this.dead = false;
 
         this.worm = new Worm(this.color, this.position, this.orientation);
+        this.scoreText = new paper.PointText({
+            point: PROPS.SCORE_LOC,
+            content: this.size,
+            fillColor: this.color,
+            fontSize: 70
+        });
     }
 
     handleEvent(key, event) {
@@ -51,6 +57,20 @@ class Player {
         return this.worm.foodCollision(food);
     }
 
+    playerCollision(other) {
+        return this.worm.playerCollision(other);
+    }
+
+    ballCollision(ball) {
+        return this.worm.ballCollision(ball);
+    }
+
+    die() {
+        this.dead = true;
+        this.color = DEAD_COLOR;
+        this.worm.updateColor(this.color);
+    }
+
     update(delta) {
         let headVector = this.worm.getHeadVector();
         let moveVector = headVector.multiply(delta * this.speed).rotate(delta * this.turnSpeed);
@@ -60,9 +80,7 @@ class Player {
             this.worm.updatePosition(this.position);
 
             if (this.edgeCollision() || this.selfCollision()) {
-                this.dead = true;
-                this.color = DEAD_COLOR;
-                this.worm.updateColor(this.color);
+                this.die();
             }
         }
     }
@@ -70,6 +88,7 @@ class Player {
     updateSize() {
         this.size++;
         this.worm.updateLength();
+        this.scoreText.content = this.size;
     }
 
     render(delta) {
