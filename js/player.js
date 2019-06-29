@@ -1,4 +1,4 @@
-const MAX_SPEED = 300;
+const MAX_SPEED = 250;
 const TURN_SPEED = 1000;
 const DEAD_COLOR = '#333333';
 

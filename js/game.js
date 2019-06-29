@@ -4,6 +4,11 @@ const GAME_STATE = {
     GAME_OVER: 'GAME_OVER'
 };
 
+const FIELD_PROPS = {
+    width: 1000,
+    height: 800
+};
+
 const KEY_SETS = {
     PLAYER_1: {
         LEFT_KEY: 65,
@@ -47,6 +52,8 @@ class Game {
 
         this.startTime = null;
         this.lastTime = null;
+
+        this.field = new Field(0, 0, paper.view.bounds.width, paper.view.bounds.height);
 
         this.player1 = new Player(PLAYER_PROPS.PLAYER_1,
             paper.view.center.add(new paper.Point(-OFFSET, 0)),
