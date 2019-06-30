@@ -45,26 +45,6 @@ class Player {
         }
     }
 
-    edgeCollision() {
-        return this.worm.edgeCollision();
-    }
-
-    selfCollision() {
-        return this.worm.selfCollision();
-    }
-
-    foodCollision(food) {
-        return this.worm.foodCollision(food);
-    }
-
-    playerCollision(other) {
-        return this.worm.playerCollision(other);
-    }
-
-    ballCollision(ball) {
-        return this.worm.ballCollision(ball);
-    }
-
     die() {
         this.dead = true;
         this.color = DEAD_COLOR;
@@ -78,10 +58,6 @@ class Player {
 
         if (!this.dead) {
             this.worm.updatePosition(this.position);
-
-            if (this.edgeCollision() || this.selfCollision()) {
-                this.die();
-            }
         }
     }
 

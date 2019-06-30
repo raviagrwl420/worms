@@ -1,6 +1,6 @@
 const FIELD_FILL_COLOR = '#fefefe';
 const FIELD_STROKE_COLOR = '#444444';
-const FIELD_WIDTH = 20;
+const FIELD_WIDTH = 1;
 
 class Field {
     constructor(x, y, width, height) {
@@ -16,6 +16,8 @@ class Field {
             fillColor: FIELD_FILL_COLOR,
             strokeColor: FIELD_STROKE_COLOR,
             strokeWidth: FIELD_WIDTH
-        })
+        });
+
+        this.collider = this.rect;
     }
 }

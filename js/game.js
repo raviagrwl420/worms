@@ -74,30 +74,45 @@ class Game {
 
     update(delta) {
         if (this.gameState == GAME_STATE.GAME_IN_PLAY) {
+            let ballFieldCollision = CollisionDetector.checkCollision(this.ball, this.field);
+            if (ballFieldCollision) {
+                this.ball.resolveCollision(ballFieldCollision);
+            }
+            let player1BallCollision = CollisionDetector.checkCollision(this.player1, this.ball);
+            let player2BallCollision = CollisionDetector.checkCollision(this.player2, this.ball);
+
+            if (CollisionDetector.checkCollision(this.player1) ||
+                CollisionDetector.checkCollision(this.player1, this.field)) {
+                this.player1.die();
+            }
+
+            if (CollisionDetector.checkCollision(this.player2) ||
+                CollisionDetector.checkCollision(this.player2, this.field)) {
+                this.player2.die();
+            }
+
             this.player1.update(delta);
             this.player2.update(delta);
             for (let i in this.foods) {
                 let food = this.foods[i];
-                if (this.player1.foodCollision(food)) {
+                if (CollisionDetector.checkCollision(this.player1, food)) {
                     this.player1.updateSize();
                     food.destroy();
                     this.foods[i] = new Food(paper.view.bounds);
                 }
-                if (this.player2.foodCollision(food)) {
+                if (CollisionDetector.checkCollision(this.player2, food)) {
                     this.player2.updateSize();
                     food.destroy();
                     this.foods[i] = new Food(paper.view.bounds);
                 }
             }
-            if (this.player1.playerCollision(this.player2)) {
+            if (CollisionDetector.checkCollision(this.player1, this.player2)) {
                 this.player1.die();
             }
-            if (this.player2.playerCollision(this.player1)) {
+            if (CollisionDetector.checkCollision(this.player2, this.player1)) {
                 this.player2.die();
             }
         }
-        this.player1.ballCollision(this.ball);
-        this.player2.ballCollision(this.ball);
         this.ball.update(delta);
     }
 
