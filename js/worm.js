@@ -21,6 +21,11 @@ class Worm {
             center: this.path.firstSegment.point,
             radius: STROKE_WIDTH / 2
         });
+
+        this.tail = new paper.Shape.Circle({
+            center: this.path.lastSegment.point,
+            radius: STROKE_WIDTH / 2
+        })
     }
 
     getHeadVector() {
@@ -43,6 +48,8 @@ class Worm {
             vector.length = SEGMENT_LENGTH;
             nextSegment.point = segment.point.subtract(vector);
         }
+
+        this.tail.position = this.path.lastSegment.point;
 
         this.path.smooth({type: 'continuous'});
     }
