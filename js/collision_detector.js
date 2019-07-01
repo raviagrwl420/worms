@@ -43,26 +43,44 @@ class CollisionDetector {
     }
 
     static checkCollisionPlayerBall(player, ball) {
-        // TODO: Fix head and tail collisions
-        // TODO: Fix handling of min translation vector when the angle is really low
+        // TODO: Fix head collisions when moving
         if (player.worm.path.strokeBounds.intersects(ball.collider.bounds)) {
             let nearest = player.worm.path.getNearestLocation(ball.collider.position);
             let distance2 = nearest.point.getDistance(ball.collider.position, true);
+            let distanceHead2 = player.worm.head.position.getDistance(ball.collider.position, true);
+            let distanceTail2 = player.worm.tail.position.getDistance(ball.collider.position, true);
             if (distance2 < Math.pow(STROKE_WIDTH, 2)) {
-                let normal = nearest.normal;
+                let normal;
+                let distance;
+                let minTranslationVector;
+
                 let ballVector = (new paper.Point(1, 0)).rotate(ball.orientation);
+                if (distance2 < distanceHead2 && distance2 < distanceTail2) {
+                    normal = nearest.normal;
+                    if (ballVector.dot(normal) > 0) {
+                        normal = normal.multiply(-1);
+                    }
+                    distance = STROKE_WIDTH - Math.sqrt(distance2);
+                } else {
+                    if (distanceHead2 < distanceTail2) {
+                        normal = ball.collider.position.subtract(player.worm.head.position).normalize();
+                        distance = STROKE_WIDTH - Math.sqrt(distanceHead2);
+                    } else {
+                        normal = ball.collider.position.subtract(player.worm.tail.position).normalize();
+                        distance = STROKE_WIDTH - Math.sqrt(distanceTail2);
+                    }
+                }
+
                 let newVector = ballVector.subtract(normal.multiply(2*ballVector.dot(normal)));
                 ball.orientation = newVector.angle;
 
-                let distance = STROKE_WIDTH - Math.sqrt(distance2);
-                let vector1 = ballVector.multiply(-1)
-                    .normalize(distance / -normal.dot(ballVector));
-                let vector2 = newVector.normalize(vector1.length);
+                // More sophisticated way to compute minTranslationVector
+                // let vector1 = ballVector.multiply(-1)
+                //     .normalize(distance / -normal.dot(ballVector));
+                // let vector2 = newVector.normalize(vector1.length);
 
                 // ball.position = ball.position.add(vector1).add(vector2);
-
-                let minTranslationVector = newVector
-                    .normalize(STROKE_WIDTH - Math.sqrt(distance2));
+                minTranslationVector = normal.normalize(distance);
                 ball.position = ball.position.add(minTranslationVector);
             }
         }
