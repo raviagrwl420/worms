@@ -1,6 +1,6 @@
 STROKE_WIDTH = 20;
 STROKE_CAP = 'round';
-NUM_POINTS = 3;
+NUM_POINTS = 10;
 SEGMENT_LENGTH = 10;
 
 class Worm {
@@ -67,5 +67,11 @@ class Worm {
 
     render(delta) {
 
+    }
+
+    destroy() {
+        this.path.remove();
+        this.head.remove();
+        this.tail.remove();
     }
 }

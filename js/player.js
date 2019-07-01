@@ -5,6 +5,7 @@ const DEAD_COLOR = '#333333';
 class Player {
     constructor(PROPS, position, orientation) {
         this.color = PROPS.COLOR;
+        this.start_position = position;
         this.position = position;
         this.orientation = orientation;
         this.keyset = PROPS.KEY_SET;
@@ -12,12 +13,13 @@ class Player {
         this.size = 0;
         this.speed = 0;
         this.turnSpeed = 0;
+        this.score = 0;
         this.dead = false;
 
         this.worm = new Worm(this.color, this.position, this.orientation);
         this.scoreText = new paper.PointText({
             point: PROPS.SCORE_LOC,
-            content: this.size,
+            content: this.score,
             fillColor: this.color,
             fontSize: 70
         });
@@ -64,10 +66,21 @@ class Player {
     updateSize() {
         this.size++;
         this.worm.updateLength();
-        this.scoreText.content = this.size;
+        // this.scoreText.content = this.size;
+    }
+
+    updateScore() {
+        this.score++;
+        this.scoreText.content = this.score;
     }
 
     render(delta) {
         this.worm.render(delta);
+    }
+
+    reset() {
+        this.worm.destroy();
+        this.position = this.start_position;
+        this.worm = new Worm(this.color, this.position, this.orientation);
     }
 }

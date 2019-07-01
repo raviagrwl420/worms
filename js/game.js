@@ -33,7 +33,7 @@ const PLAYER_PROPS = {
     PLAYER_2: {
         COLOR: '#0CE880',
         KEY_SET: KEY_SETS.PLAYER_2,
-        SCORE_LOC: [1800, 100]
+        SCORE_LOC: [1100, 100]
     }
 };
 
@@ -43,8 +43,8 @@ const EVENT = {
     PRESS: 3
 };
 
-const NUM_FOODS = 20;
-const OFFSET = 500;
+const NUM_FOODS = 0;
+const OFFSET = 200;
 
 class Game {
     constructor() {
@@ -76,23 +76,33 @@ class Game {
         if (this.gameState == GAME_STATE.GAME_IN_PLAY) {
             let ballFieldCollision = CollisionDetector.checkCollision(this.ball, this.field);
             if (ballFieldCollision) {
-                this.ball.resolveCollision(ballFieldCollision);
+                if (ballFieldCollision.side === COLLISION_SIDES.RIGHT) {
+                    this.player1.updateScore();
+                    this.ball.destroy();
+                    this.ball = new Ball(paper.view.center);
+                } else if (ballFieldCollision.side === COLLISION_SIDES.LEFT) {
+                    this.player2.updateScore();
+                    this.ball.destroy();
+                    this.ball = new Ball(paper.view.center);
+                } else {
+                    this.ball.resolveCollision(ballFieldCollision);
+                }
             }
             let player1BallCollision = CollisionDetector.checkCollision(this.player1, this.ball);
             let player2BallCollision = CollisionDetector.checkCollision(this.player2, this.ball);
 
             if (CollisionDetector.checkCollision(this.player1) ||
-                CollisionDetector.checkCollision(this.player1, this.field)) {
-                this.player1.die();
+                CollisionDetector.checkCollision(this.player1, this.field) ||
+                CollisionDetector.checkCollision(this.player1, this.player2)) {
+                // this.player1.die();
             }
 
             if (CollisionDetector.checkCollision(this.player2) ||
-                CollisionDetector.checkCollision(this.player2, this.field)) {
-                this.player2.die();
+                CollisionDetector.checkCollision(this.player2, this.field) ||
+                CollisionDetector.checkCollision(this.player2, this.player1)) {
+                // this.player2.die();
             }
 
-            this.player1.update(delta);
-            this.player2.update(delta);
             for (let i in this.foods) {
                 let food = this.foods[i];
                 if (CollisionDetector.checkCollision(this.player1, food)) {
@@ -106,14 +116,19 @@ class Game {
                     this.foods[i] = new Food(paper.view.bounds);
                 }
             }
-            if (CollisionDetector.checkCollision(this.player1, this.player2)) {
-                this.player1.die();
+
+            if (CollisionDetector.checkPlayerOutOfField(this.player1, this.field)) {
+                this.player1.reset();
             }
-            if (CollisionDetector.checkCollision(this.player2, this.player1)) {
-                this.player2.die();
+
+            if (CollisionDetector.checkPlayerOutOfField(this.player2, this.field)) {
+                this.player2.reset();
             }
+
+            this.player1.update(delta);
+            this.player2.update(delta);
+            this.ball.update(delta);
         }
-        this.ball.update(delta);
     }
 
     render(delta) {

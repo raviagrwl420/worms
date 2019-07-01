@@ -72,6 +72,10 @@ class CollisionDetector {
         return !field.collider.bounds.contains(player.worm.head.bounds);
     }
 
+    static checkPlayerOutOfField(player, field) {
+        return !field.collider.bounds.intersects(player.worm.path.strokeBounds);
+    }
+
     static checkCollisionPlayerPlayer(player1, player2) {
         let head = player1.worm.head;
 
